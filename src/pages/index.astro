@@ -1,12 +1,13 @@
 ---
+import { createClient } from '@supabase/supabase-js'
+
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_DATABASE_URL
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('PUBLIC_SUPABASE_DATABASE_URL or PUBLIC_SUPABASE_ANON_KEY is missing')
+  throw new Error('PUBLIC_SUPABASE_DATABASE_URL ou PUBLIC_SUPABASE_ANON_KEY estão ausentes')
 }
 
-import { createClient } from '@supabase/supabase-js'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const { data: profissionais } = await supabase
@@ -15,7 +16,6 @@ const { data: profissionais } = await supabase
   .eq('plano_ativo', true)
   .order('nome', { ascending: true })
 ---
-
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -32,23 +32,22 @@ const { data: profissionais } = await supabase
         id="busca"
         placeholder="Buscar por nome, cidade ou especialidade..."
         class="w-full p-3 rounded-lg border border-gray-300 mb-8"
-        oninput="filtrar()"
       />
 
       <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {(profissionais || []).map((p) => (
           <div
             class="bg-white shadow rounded-lg p-4 space-y-2 card"
-            data-nome={String(p.nome || '')}
-            data-cidade={String(p.cidade || '')}
-            data-especialidades={p.especialidades ? p.especialidades.join(' ') : ''}
+            data-nome={p.nome}
+            data-cidade={p.cidade}
+            data-especialidades={(p.especialidades || []).join(' ')}
           >
             <img src={p.foto_url} alt={p.nome} class="w-full h-48 object-cover rounded-lg" />
             <h2 class="text-xl font-semibold">{p.nome}</h2>
             <p class="text-sm text-gray-500">{p.cidade}, {p.estado}</p>
             <p class="text-sm text-gray-600">{p.bio}</p>
             <p class="text-sm mt-2">
-              <strong>Especialidades:</strong> {p.especialidades?.join(', ') || ''}
+              <strong>Especialidades:</strong> {(p.especialidades || []).join(', ')}
             </p>
             <a
               href={`https://wa.me/${p.whatsapp}`}
@@ -70,23 +69,23 @@ const { data: profissionais } = await supabase
     </div>
 
     <script is:inline>
-      function filtrar() {
+      document.getElementById('busca')?.addEventListener('input', () => {
         const termo = document.getElementById('busca')?.value?.toLowerCase() || ''
         const cards = document.querySelectorAll('.card')
 
-        cards.forEach((card) => {
-          const nome = card.getAttribute('data-nome')?.toLowerCase() || ''
-          const cidade = card.getAttribute('data-cidade')?.toLowerCase() || ''
-          const especialidades = card.getAttribute('data-especialidades')?.toLowerCase() || ''
+        cards.forEach((el) => {
+          const nome = el.getAttribute('data-nome')?.toLowerCase() || ''
+          const cidade = el.getAttribute('data-cidade')?.toLowerCase() || ''
+          const especialidades = el.getAttribute('data-especialidades')?.toLowerCase() || ''
           const texto = nome + cidade + especialidades
 
           if (texto.includes(termo)) {
-            card.setAttribute('style', 'display: block')
+            el.style.display = 'block'
           } else {
-            card.setAttribute('style', 'display: none')
+            el.style.display = 'none'
           }
         })
-      }
+      })
     </script>
   </body>
 </html>
