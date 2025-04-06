@@ -31,7 +31,7 @@ const { data: profissionais } = await supabase
       />
 
       <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {profissionais.map((p) => (
+        {(profissionais || []).map((p) => (
           <div class="bg-white shadow rounded-lg p-4 space-y-2 card" data-nome={p.nome} data-cidade={p.cidade} data-especialidades={p.especialidades.join(' ')}>
             <img src={p.foto_url} alt={p.nome} class="w-full h-48 object-cover rounded-lg" />
             <h2 class="text-xl font-semibold">{p.nome}</h2>
@@ -53,14 +53,17 @@ const { data: profissionais } = await supabase
 
     <script>
       function filtrar() {
-        const termo = document.getElementById('busca').value.toLowerCase()
+        const input = document.getElementById('busca') as HTMLInputElement
+        const termo = input?.value.toLowerCase() || ''
+
         const cards = document.querySelectorAll('.card')
-        cards.forEach(card => {
-          const nome = card.dataset.nome.toLowerCase()
-          const cidade = card.dataset.cidade.toLowerCase()
-          const especialidades = card.dataset.especialidades.toLowerCase()
+        cards.forEach((card) => {
+          const el = card as HTMLElement
+          const nome = el.dataset.nome?.toLowerCase() || ''
+          const cidade = el.dataset.cidade?.toLowerCase() || ''
+          const especialidades = el.dataset.especialidades?.toLowerCase() || ''
           const texto = nome + cidade + especialidades
-          card.style.display = texto.includes(termo) ? '' : 'none'
+          el.style.display = texto.includes(termo) ? '' : 'none'
         })
       }
     </script>
