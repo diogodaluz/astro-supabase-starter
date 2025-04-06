@@ -69,12 +69,12 @@ const { data: profissionais } = await supabase
 
     <script>
       function filtrar() {
-        const input = document.getElementById('busca')
+        const input = document.getElementById('busca') as HTMLInputElement
         const termo = input?.value.toLowerCase() || ''
 
         const cards = document.querySelectorAll('.card')
         cards.forEach((card) => {
-          const el = card
+          const el = card as HTMLElement
           const nome = el.dataset.nome?.toLowerCase() || ''
           const cidade = el.dataset.cidade?.toLowerCase() || ''
           const especialidades = el.dataset.especialidades?.toLowerCase() || ''
