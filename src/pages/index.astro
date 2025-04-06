@@ -1,10 +1,13 @@
 ---
-import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_DATABASE_URL
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-)
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('PUBLIC_SUPABASE_DATABASE_URL or PUBLIC_SUPABASE_ANON_KEY is missing')
+}
+
+import { createClient } from '@supabase/supabase-js'
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 const { data: profissionais } = await supabase
   .from('profissionais')
@@ -16,17 +19,17 @@ const { data: profissionais } = await supabase
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profissionais | Marketplace</title>
+    <title>Marketplace de Profissionais</title>
   </head>
-  <body class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold mb-6">Encontre um profissional</h1>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-10">
+      <h1 class="text-3xl font-bold mb-6 text-gray-800">Encontre um profissional</h1>
 
       <input
         type="text"
         id="busca"
         placeholder="Buscar por nome, cidade ou especialidade..."
-        class="w-full p-3 rounded-lg border border-gray-300 mb-6"
+        class="w-full p-3 rounded-lg border border-gray-300 mb-8"
         oninput="filtrar()"
       />
 
