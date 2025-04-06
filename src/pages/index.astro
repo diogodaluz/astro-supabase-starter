@@ -20,6 +20,7 @@ const { data: profissionais } = await supabase
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marketplace de Profissionais</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   </head>
   <body class="bg-gray-100 min-h-screen">
     <div class="max-w-7xl mx-auto px-4 py-10">
@@ -67,19 +68,22 @@ const { data: profissionais } = await supabase
       </div>
     </div>
 
-    <script>
+    <script is:inline>
       function filtrar() {
-        const input = document.getElementById('busca') as HTMLInputElement
-        const termo = input?.value.toLowerCase() || ''
-
+        const termo = document.getElementById('busca')?.value?.toLowerCase() || ''
         const cards = document.querySelectorAll('.card')
+
         cards.forEach((card) => {
-          const el = card as HTMLElement
-          const nome = el.dataset.nome?.toLowerCase() || ''
-          const cidade = el.dataset.cidade?.toLowerCase() || ''
-          const especialidades = el.dataset.especialidades?.toLowerCase() || ''
+          const nome = card.getAttribute('data-nome')?.toLowerCase() || ''
+          const cidade = card.getAttribute('data-cidade')?.toLowerCase() || ''
+          const especialidades = card.getAttribute('data-especialidades')?.toLowerCase() || ''
           const texto = nome + cidade + especialidades
-          el.style.display = texto.includes(termo) ? '' : 'none'
+
+          if (texto.includes(termo)) {
+            card.setAttribute('style', 'display: block')
+          } else {
+            card.setAttribute('style', 'display: none')
+          }
         })
       }
     </script>
