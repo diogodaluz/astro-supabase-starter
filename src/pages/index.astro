@@ -1,71 +1,68 @@
 ---
-import { getEntry } from "astro:content";
-import Alert from "../components/Alert.astro";
-import Guide from "../components/Guide.astro";
-import Layout from "../components/Layout.astro";
-import TableRow from "../components/TableRow.astro";
-import { supabase } from "../utils/database";
+import { createClient } from '@supabase/supabase-js'
 
-export const prerender = false;
+const supabase = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+)
 
-let frameworks;
-let frameworksError;
-
-// Fetch frameworks data from Supabase if connection is set up
-if (supabase) {
-  const { data, error } = await supabase
-    .from("frameworks")
-    .select("*")
-    .order("likes", { ascending: false });
-  frameworks = data;
-  frameworksError = error;
-}
-
-// Get guides
-const connectGuide = await getEntry("guides", "guide-connect-supabase");
-const fetchDataGuide = await getEntry("guides", "guide-fetch-data");
+const { data: profissionais } = await supabase
+  .from('profissionais')
+  .select('*')
+  .eq('plano_ativo', true)
+  .order('nome', { ascending: true })
 ---
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profissionais | Marketplace</title>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-6">Encontre um profissional</h1>
 
-<Layout title="Web Frameworks">
-  {
-    supabase ? (
-      frameworks ? (
-        <>
-          <h1 class="mb-8 text-4xl font-bold">
-            Vote for Your Favorite Web Framework
-          </h1>
-          <table class="w-full text-left">
-            <thead>
-              <tr class="font-mono text-base border-t border-b">
-                <th>Name</th>
-                <th>Logo</th>
-                <th>Likes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {frameworks?.map((framework) => (
-                <TableRow framework={framework} />
-              ))}
-            </tbody>
-          </table>
-        </>
-      ) : (
-        <>
-          {frameworksError && (
-            <Alert
-              title={frameworksError.code}
-              text={frameworksError.message}
-              variant="error"
-            />
-          )}
-          {fetchDataGuide && <Guide guide={fetchDataGuide} />}
-        </>
-      )
-    ) : (
-      <>
-        <Alert title="Finish setting up your new site" text="Before your website is ready, you must complete the steps from the guide below to create, populate, and connect your Supabase database."/>
-        {connectGuide && <Guide guide={connectGuide} />}
-      </>
-    )
-  }
-</Layout>
+      <input
+        type="text"
+        id="busca"
+        placeholder="Buscar por nome, cidade ou especialidade..."
+        class="w-full p-3 rounded-lg border border-gray-300 mb-6"
+        oninput="filtrar()"
+      />
+
+      <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {profissionais.map((p) => (
+          <div class="bg-white shadow rounded-lg p-4 space-y-2 card" data-nome={p.nome} data-cidade={p.cidade} data-especialidades={p.especialidades.join(' ')}>
+            <img src={p.foto_url} alt={p.nome} class="w-full h-48 object-cover rounded-lg" />
+            <h2 class="text-xl font-semibold">{p.nome}</h2>
+            <p class="text-sm text-gray-500">{p.cidade}, {p.estado}</p>
+            <p class="text-sm text-gray-600">{p.bio}</p>
+            <p class="text-sm mt-2"><strong>Especialidades:</strong> {p.especialidades.join(', ')}</p>
+            <a href={`https://wa.me/${p.whatsapp}`} target="_blank" class="inline-block mt-2 text-green-600 font-semibold">Falar no WhatsApp</a>
+            {p.latitude && p.longitude && (
+              <iframe
+                src={`https://www.google.com/maps?q=${p.latitude},${p.longitude}&hl=pt-br&z=15&output=embed`}
+                class="w-full h-48 mt-3 rounded-lg"
+                loading="lazy"
+              ></iframe>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <script>
+      function filtrar() {
+        const termo = document.getElementById('busca').value.toLowerCase()
+        const cards = document.querySelectorAll('.card')
+        cards.forEach(card => {
+          const nome = card.dataset.nome.toLowerCase()
+          const cidade = card.dataset.cidade.toLowerCase()
+          const especialidades = card.dataset.especialidades.toLowerCase()
+          const texto = nome + cidade + especialidades
+          card.style.display = texto.includes(termo) ? '' : 'none'
+        })
+      }
+    </script>
+  </body>
+</html>
