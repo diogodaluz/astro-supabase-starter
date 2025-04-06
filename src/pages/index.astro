@@ -41,7 +41,9 @@ const { data: profissionais } = await supabase
             <p class="text-sm text-gray-500">{p.cidade}, {p.estado}</p>
             <p class="text-sm text-gray-600">{p.bio}</p>
             <p class="text-sm mt-2"><strong>Especialidades:</strong> {p.especialidades.join(', ')}</p>
-            <a href={`https://wa.me/${p.whatsapp}`} target="_blank" class="inline-block mt-2 text-green-600 font-semibold">Falar no WhatsApp</a>
+            <a href={`https://wa.me/${p.whatsapp}`} target="_blank" class="inline-block mt-2 text-green-600 font-semibold">
+              Falar no WhatsApp
+            </a>
             {p.latitude && p.longitude && (
               <iframe
                 src={`https://www.google.com/maps?q=${p.latitude},${p.longitude}&hl=pt-br&z=15&output=embed`}
