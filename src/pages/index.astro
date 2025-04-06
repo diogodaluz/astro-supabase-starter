@@ -39,14 +39,14 @@ const { data: profissionais } = await supabase
             class="bg-white shadow rounded-lg p-4 space-y-2 card"
             data-nome={p.nome}
             data-cidade={p.cidade}
-            data-especialidades={`${p.especialidades.join(' ')}`}
+            data-especialidades={`${p.especialidades?.join(' ') || ''}`}
           >
             <img src={p.foto_url} alt={p.nome} class="w-full h-48 object-cover rounded-lg" />
             <h2 class="text-xl font-semibold">{p.nome}</h2>
             <p class="text-sm text-gray-500">{p.cidade}, {p.estado}</p>
             <p class="text-sm text-gray-600">{p.bio}</p>
             <p class="text-sm mt-2">
-              <strong>Especialidades:</strong> {p.especialidades.join(', ')}
+              <strong>Especialidades:</strong> {p.especialidades?.join(', ') || ''}
             </p>
             <a
               href={`https://wa.me/${p.whatsapp}`}
@@ -69,12 +69,12 @@ const { data: profissionais } = await supabase
 
     <script>
       function filtrar() {
-        const input = document.getElementById('busca') as HTMLInputElement
+        const input = document.getElementById('busca')
         const termo = input?.value.toLowerCase() || ''
 
         const cards = document.querySelectorAll('.card')
         cards.forEach((card) => {
-          const el = card as HTMLElement
+          const el = card
           const nome = el.dataset.nome?.toLowerCase() || ''
           const cidade = el.dataset.cidade?.toLowerCase() || ''
           const especialidades = el.dataset.especialidades?.toLowerCase() || ''
