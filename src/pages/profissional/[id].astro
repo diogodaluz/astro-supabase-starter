@@ -5,34 +5,41 @@ const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_DATABASE_URL
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('PUBLIC_SUPABASE_DATABASE_URL or PUBLIC_SUPABASE_ANON_KEY is missing')
+  throw new Error('Chaves do Supabase não configuradas corretamente.')
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// OBRIGATÓRIO para rotas dinâmicas
 export async function getStaticPaths() {
-  const { data: profissionais } = await supabase.from('profissionais').select('id')
-  return profissionais.map((p) => ({
-    params: { id: String(p.id) }
-  }))
+  const { data: profissionais } = await supabase
+    .from('profissionais')
+    .select('id')
+
+  return profissionais?.map((p) => ({
+    params: { id: p.id.toString() }
+  })) || []
 }
 
-const { id } = Astro.params
-const { data: profissional } = await supabase
-  .from('profissionais')
-  .select('*')
-  .eq('id', id)
-  .single()
+export async function get({ params }) {
+  const { data: profissional } = await supabase
+    .from('profissionais')
+    .select('*')
+    .eq('id', params.id)
+    .single()
+
+  return { props: { profissional } }
+}
+
+const { profissional } = Astro.props
 ---
 
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{profissional?.nome} - Fazum<b>BES</b></title>
+    <title>{profissional?.nome} - FazumBES</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.js" defer is:inline></script>
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.js" defer></script>
   </head>
   <body class="bg-gray-50 text-gray-800">
     <div class="max-w-3xl mx-auto px-4 py-10">
@@ -66,7 +73,7 @@ const { data: profissional } = await supabase
     </div>
 
     <footer class="text-center text-sm text-gray-500 mt-10">
-      <p>© {new Date().getFullYear()} Fazum<b>BES</b>. Todos os direitos reservados.</p>
+      <p>© {new Date().getFullYear()} Fazum<span class="font-bold">BES</span>. Todos os direitos reservados.</p>
       <p>
         <a href="/termos" class="underline text-gray-500 hover:text-gray-700">Termos de uso</a> |
         <a href="/politica" class="underline text-gray-500 hover:text-gray-700">Política de privacidade</a>
