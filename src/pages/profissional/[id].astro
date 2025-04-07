@@ -10,18 +10,27 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-const id = Astro.params.id
+// OBRIGATÓRIO para rotas dinâmicas
+export async function getStaticPaths() {
+  const { data: profissionais } = await supabase.from('profissionais').select('id')
+  return profissionais.map((p) => ({
+    params: { id: String(p.id) }
+  }))
+}
+
+const { id } = Astro.params
 const { data: profissional } = await supabase
   .from('profissionais')
   .select('*')
   .eq('id', id)
   .single()
 ---
+
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{profissional?.nome} - FazumBES</title>
+    <title>{profissional?.nome} - Fazum<b>BES</b></title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.js" defer is:inline></script>
   </head>
