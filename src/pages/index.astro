@@ -5,7 +5,7 @@ const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_DATABASE_URL
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('PUBLIC_SUPABASE_DATABASE_URL ou PUBLIC_SUPABASE_ANON_KEY estão ausentes')
+  throw new Error('PUBLIC_SUPABASE_DATABASE_URL or PUBLIC_SUPABASE_ANON_KEY is missing')
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey)
@@ -20,72 +20,82 @@ const { data: profissionais } = await supabase
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Marketplace de Profissionais</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <title>FazumBes | Encontre seu profissional</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.js" defer></script>
   </head>
-  <body class="bg-gray-100 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 py-10">
-      <h1 class="text-3xl font-bold mb-6 text-gray-800">Encontre um profissional</h1>
+  <body class="bg-white text-gray-800">
 
+    <!-- Header -->
+    <header class="shadow-sm border-b">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">
+          fazum<strong>bes</strong>
+        </h1>
+        <nav class="space-x-6">
+          <a href="#busca" class="text-gray-700 hover:text-black font-medium">Buscar</a>
+          <a href="#" class="text-gray-700 hover:text-black font-medium">Categorias</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero / Busca -->
+    <main class="max-w-7xl mx-auto px-4 py-10">
+      <h2 class="text-3xl font-bold mb-6">Encontre o profissional ideal</h2>
       <input
-        type="text"
         id="busca"
+        type="text"
         placeholder="Buscar por nome, cidade ou especialidade..."
-        class="w-full p-3 rounded-lg border border-gray-300 mb-8"
+        oninput="filtrar()"
+        class="w-full p-3 rounded-md border border-gray-300 mb-8"
       />
 
+      <!-- Cards -->
       <div id="cards" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {(profissionais || []).map((p) => (
-          <div
-            class="bg-white shadow rounded-lg p-4 space-y-2 card"
+          <a
+            href={`/profissional/${p.id}`}
+            class="bg-gray-50 border hover:shadow-md transition rounded-lg p-4 block card"
             data-nome={p.nome}
             data-cidade={p.cidade}
-            data-especialidades={(p.especialidades || []).join(' ')}
+            data-especialidades={`${p.especialidades?.join(' ') || ''}`}
           >
-            <img src={p.foto_url} alt={p.nome} class="w-full h-48 object-cover rounded-lg" />
-            <h2 class="text-xl font-semibold">{p.nome}</h2>
-            <p class="text-sm text-gray-500">{p.cidade}, {p.estado}</p>
-            <p class="text-sm text-gray-600">{p.bio}</p>
+            <img src={p.foto_url} alt={p.nome} class="w-full h-48 object-cover rounded-lg mb-3" />
+            <h3 class="text-xl font-semibold">{p.nome}</h3>
+            <p class="text-sm text-gray-600">{p.cidade}, {p.estado}</p>
+            <p class="text-sm text-gray-500 mt-1">{p.bio}</p>
             <p class="text-sm mt-2">
-              <strong>Especialidades:</strong> {(p.especialidades || []).join(', ')}
+              <strong>Especialidades:</strong> {p.especialidades?.join(', ') || ''}
             </p>
-            <a
-              href={`https://wa.me/${p.whatsapp}`}
-              target="_blank"
-              class="inline-block mt-2 text-green-600 font-semibold"
-            >
-              Falar no WhatsApp
-            </a>
-            {p.latitude && p.longitude && (
-              <iframe
-                src={`https://www.google.com/maps?q=${p.latitude},${p.longitude}&hl=pt-br&z=15&output=embed`}
-                class="w-full h-48 mt-3 rounded-lg"
-                loading="lazy"
-              ></iframe>
-            )}
-          </div>
+            <p class="text-sm text-green-700 font-medium mt-2">Clique para ver detalhes</p>
+          </a>
         ))}
       </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 border-t mt-16">
+      <div class="max-w-7xl mx-auto px-4 py-8 text-sm text-gray-500 flex justify-between flex-col md:flex-row gap-4">
+        <div>&copy; {new Date().getFullYear()} fazum<strong>bes</strong>. Todos os direitos reservados.</div>
+        <div class="space-x-4">
+          <a href="/politica-de-privacidade" class="hover:underline">Política de Privacidade</a>
+          <a href="/termos-de-uso" class="hover:underline">Termos de Uso</a>
+        </div>
+      </div>
+    </footer>
 
     <script is:inline>
-      document.getElementById('busca')?.addEventListener('input', () => {
+      function filtrar() {
         const termo = document.getElementById('busca')?.value?.toLowerCase() || ''
         const cards = document.querySelectorAll('.card')
-
-        cards.forEach((el) => {
-          const nome = el.getAttribute('data-nome')?.toLowerCase() || ''
-          const cidade = el.getAttribute('data-cidade')?.toLowerCase() || ''
-          const especialidades = el.getAttribute('data-especialidades')?.toLowerCase() || ''
+        cards.forEach((card) => {
+          const nome = card.getAttribute('data-nome')?.toLowerCase() || ''
+          const cidade = card.getAttribute('data-cidade')?.toLowerCase() || ''
+          const especialidades = card.getAttribute('data-especialidades')?.toLowerCase() || ''
           const texto = nome + cidade + especialidades
-
-          if (texto.includes(termo)) {
-            el.style.display = 'block'
-          } else {
-            el.style.display = 'none'
-          }
+          card.style.display = texto.includes(termo) ? 'block' : 'none'
         })
-      })
+      }
     </script>
   </body>
 </html>
