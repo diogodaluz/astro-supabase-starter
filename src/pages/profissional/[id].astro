@@ -10,16 +10,20 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+/** @type {import('astro').GetStaticPaths} */
 export async function getStaticPaths() {
   const { data: profissionais } = await supabase
     .from('profissionais')
     .select('id')
 
-  return profissionais?.map((p) => ({
+  if (!profissionais) return []
+
+  return profissionais.map((p) => ({
     params: { id: p.id.toString() }
-  })) || []
+  }))
 }
 
+/** @type {import('astro').GetStaticProps} */
 export async function get({ params }) {
   const { data: profissional } = await supabase
     .from('profissionais')
@@ -52,7 +56,9 @@ const { profissional } = Astro.props
         <p class="text-gray-600 mb-1">{profissional.cidade}, {profissional.estado}</p>
         <p class="text-gray-700 mb-4">{profissional.bio}</p>
 
-        <p class="mb-2"><strong>Especialidades:</strong> {profissional.especialidades?.join(', ') || 'Não informado'}</p>
+        <p class="mb-2">
+          <strong>Especialidades:</strong> {profissional.especialidades?.join(', ') || 'Não informado'}
+        </p>
 
         <a
           href={`https://wa.me/${profissional.whatsapp}`}
